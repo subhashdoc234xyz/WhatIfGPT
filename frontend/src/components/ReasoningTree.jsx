@@ -112,7 +112,8 @@ function ReasoningTree({ branch, selectedNode, onSelectNode }) {
         minZoom={0.2}
         maxZoom={2}
         panOnDrag
-        zoomOnScroll
+        zoomOnScroll={false}
+        panOnScroll={true}
         selectNodesOnDrag={false}
         attributionPosition="bottom-right"
       >
