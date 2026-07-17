@@ -137,6 +137,7 @@ async def compare_branches_endpoint(request: CompareRequest):
         )
         return {"comparison": comparison}
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/suggestions")
 async def suggestions_endpoint(request: SuggestionsRequest):
