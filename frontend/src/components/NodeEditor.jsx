@@ -4,74 +4,74 @@ function NodeEditor({ step, onSave, onClose }) {
   const [editedText, setEditedText] = useState(step.stepText);
 
   const handleSave = () => {
-    const updatedStep = {
-      ...step,
-      stepText: editedText,
-    };
-    onSave(updatedStep);
+    onSave({ ...step, stepText: editedText });
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="glass-panel max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex items-start justify-between mb-4">
-            <h3 className="text-2xl font-bold">
-              {step.isConclusion ? '🎯 Edit Conclusion' : `✏️ Edit Step ${step.id}`}
-            </h3>
-            <button
-              onClick={onClose}
-              className="text-white/70 hover:text-white transition-colors text-2xl"
-            >
-              ×
-            </button>
-          </div>
+    <div className="modal-backdrop">
+      <div className="card" style={{ maxWidth: '640px', width: '100%', maxHeight: '85vh', overflowY: 'auto', border: '1px solid #C4B5FD', padding: '32px' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+          <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1E1B2E' }}>
+            {step.isConclusion ? '🎯 Edit Conclusion' : `✏️ Edit Step ${step.id}`}
+          </h3>
+          <button
+            onClick={onClose}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.8rem', color: '#6B7280', lineHeight: 1, opacity: 0.8, padding: '4px' }}
+          >
+            ×
+          </button>
+        </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-semibold mb-2 opacity-80">
-              Original Text:
-            </label>
-            <div className="glass-card p-3 text-sm text-white/70 whitespace-pre-wrap">
-              {step.stepText}
-            </div>
+        {/* Original */}
+        <div style={{ marginBottom: '24px' }}>
+          <p className="section-title">
+            Original Text
+          </p>
+          <div style={{ background: '#FAF9FF', border: '1px solid #E9E5FF', borderRadius: '12px', padding: '16px', fontSize: '0.9rem', color: '#6B7280', fontWeight: 500, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+            {step.stepText}
           </div>
+        </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-semibold mb-2 opacity-80">
-              Edit Assumption / Content:
-            </label>
-            <textarea
-              value={editedText}
-              onChange={(e) => setEditedText(e.target.value)}
-              className="glass-input w-full p-4 min-h-[150px] resize-none"
-              placeholder="Change the assumption or content..."
-            />
-          </div>
+        {/* Edit */}
+        <div style={{ marginBottom: '24px' }}>
+          <p className="section-title">
+            Edit Assumption
+          </p>
+          <textarea
+            className="input"
+            value={editedText}
+            onChange={(e) => setEditedText(e.target.value)}
+            placeholder="Change the assumption or content…"
+            rows={5}
+            style={{ minHeight: '150px', backgroundColor: '#ffffff' }}
+          />
+        </div>
 
-          <div className="bg-blue-500/20 border border-blue-400/30 rounded-lg p-4 mb-6">
-            <h4 className="font-semibold mb-2">💡 What happens next?</h4>
-            <p className="text-sm text-white/80">
-              When you save this edit, a new branch will be created. The AI will re-run its reasoning 
-              from this point forward with your changed assumption, allowing you to see how different 
-              assumptions lead to different conclusions.
-            </p>
-          </div>
+        {/* Info banner */}
+        <div style={{ background: '#F3F0FF', border: '1px solid #C4B5FD', borderRadius: '12px', padding: '14px 18px', marginBottom: '24px' }}>
+          <p style={{ fontSize: '0.85rem', color: '#8b5cf6', fontWeight: 600, lineHeight: 1.5 }}>
+            💡 Saving this edit will create a new branch. The AI will re-reason from this point forward with your changed assumption.
+          </p>
+        </div>
 
-          <div className="flex gap-3">
-            <button
-              onClick={handleSave}
-              disabled={!editedText.trim()}
-              className="glass-button flex-1 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              🔄 Save & Create Branch
-            </button>
-            <button
-              onClick={onClose}
-              className="glass-button py-3 px-6 bg-white/10"
-            >
-              Cancel
-            </button>
-          </div>
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: '16px' }}>
+          <button
+            className="btn-primary"
+            onClick={handleSave}
+            disabled={!editedText.trim()}
+            style={{ flex: 1 }}
+          >
+            🔄 Save & Create Branch
+          </button>
+          <button
+            className="btn-secondary"
+            onClick={onClose}
+            style={{ padding: '14px 24px' }}
+          >
+            Cancel
+          </button>
         </div>
       </div>
     </div>

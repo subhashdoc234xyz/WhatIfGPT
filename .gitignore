@@ -1,4 +1,34 @@
-```
-# Build artifacts
+# Environment variables
+.env
+.env.local
+.env.*.local
+frontend/.env
+frontend/.env.local
+
+# Python caches and system files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+venv/
+ENV/
+
+# Dependency directories
+node_modules/
+frontend/node_modules/
+
+# Build outputs
+dist/
 frontend/dist/
-```
+build/
+
+# IDE files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

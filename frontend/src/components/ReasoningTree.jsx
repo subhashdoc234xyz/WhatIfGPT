@@ -1,47 +1,87 @@
 import React, { useMemo } from 'react';
-import ReactFlow, { Background, Controls } from 'react-flow-renderer';
+import ReactFlow, { Background, Controls, MarkerType } from 'react-flow-renderer';
 
 function ReasoningTree({ branch, selectedNode, onSelectNode }) {
-  const nodesAndEdges = useMemo(() => {
+  const { nodes, edges } = useMemo(() => {
     if (!branch || !branch.steps) return { nodes: [], edges: [] };
 
     const nodes = branch.steps.map((step, index) => {
       const isSelected = selectedNode?.id === step.id;
-      
+      const isConclusion = step.isConclusion;
+
       return {
         id: step.id.toString(),
-        position: { x: 50, y: index * 180 },
+        position: { x: 60, y: index * 190 },
         data: {
           label: (
-            <div 
-              className="p-4 rounded-lg glass-card cursor-pointer transition-all hover:scale-105"
-              style={{
-                borderLeft: `4px solid ${branch.color}`,
-                backgroundColor: isSelected ? 'rgba(255, 255, 255, 0.25)' : undefined,
-              }}
+            <div
               onClick={() => onSelectNode(step)}
+              style={{
+                background: isSelected ? '#F5F3FF' : '#ffffff',
+                border: isSelected 
+                  ? `2px solid ${branch.color}` 
+                  : isConclusion 
+                    ? `2.5px solid ${branch.color}` 
+                    : '1px solid #E9E5FF',
+                borderLeft: `5px solid ${branch.color}`,
+                borderRadius: '12px',
+                padding: '14px 16px',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                boxShadow: isSelected
+                  ? `0 4px 20px rgba(139, 92, 246, 0.15)`
+                  : '0 4px 20px rgba(139, 92, 246, 0.08)',
+              }}
             >
-              <div className="flex items-start justify-between gap-2">
-                <span className="font-bold text-sm opacity-70">
-                  {step.isConclusion ? '🎯 Conclusion' : `Step ${step.id}`}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', gap: '8px' }}>
+                <span style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  color: branch.color,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.07em',
+                }}>
+                  {isConclusion ? '🎯 Conclusion' : `Step ${step.id}`}
                 </span>
-                {!step.isConclusion && (
-                  <span className="text-xs bg-white/20 px-2 py-1 rounded">
-                    ✏️ Click to edit
+                {isConclusion ? (
+                  <span style={{
+                    fontSize: '0.62rem',
+                    fontWeight: 700,
+                    color: '#8b5cf6',
+                    background: '#F3F0FF',
+                    border: '1px solid #C4B5FD',
+                    borderRadius: '6px',
+                    padding: '2px 6px',
+                  }}>
+                    FINAL ANSWER
+                  </span>
+                ) : (
+                  <span style={{
+                    fontSize: '0.65rem',
+                    fontWeight: 600,
+                    color: '#8b5cf6',
+                    background: '#FAF9FF',
+                    border: '1px solid #E9E5FF',
+                    borderRadius: '20px',
+                    padding: '2px 8px',
+                  }}>
+                    ✏️ Edit
                   </span>
                 )}
               </div>
-              <p className="mt-2 text-sm leading-relaxed whitespace-pre-wrap">
+              <p style={{
+                fontSize: '0.82rem',
+                color: '#1E1B2E',
+                lineHeight: 1.55,
+                fontWeight: 500,
+                whiteSpace: 'pre-wrap',
+              }}>
                 {step.stepText}
               </p>
             </div>
           ),
         },
-        style: {
-          background: 'transparent',
-          border: 'none',
-          width: 350,
-        },
+        style: { background: 'transparent', border: 'none', width: 360 },
       };
     });
 
@@ -53,48 +93,42 @@ function ReasoningTree({ branch, selectedNode, onSelectNode }) {
         target: step.id.toString(),
         type: 'smoothstep',
         animated: false,
-        style: { stroke: 'rgba(255, 255, 255, 0.5)', strokeWidth: 2 },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color: 'rgba(255, 255, 255, 0.5)',
-        },
+        style: { stroke: '#C4B5FD', strokeWidth: 2.5 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#C4B5FD' },
       }));
 
     return { nodes, edges };
   }, [branch, selectedNode, onSelectNode]);
 
-  if (!branch || !branch.steps || branch.steps.length === 0) {
-    return null;
-  }
+  if (!branch?.steps?.length) return null;
 
   return (
-    <div className="glass-panel h-[700px] w-full">
+    <div className="card" style={{ height: '680px', position: 'relative', overflow: 'hidden' }}>
       <ReactFlow
-        nodes={nodesAndEdges.nodes}
-        edges={nodesAndEdges.edges}
+        nodes={nodes}
+        edges={edges}
         fitView
-        attributionPosition="bottom-right"
-        defaultZoom={0.8}
+        defaultViewport={{ zoom: 0.8, x: 0, y: 0 }}
         minZoom={0.2}
         maxZoom={2}
-        panOnDrag={true}
-        zoomOnScroll={true}
+        panOnDrag
+        zoomOnScroll
         selectNodesOnDrag={false}
+        attributionPosition="bottom-right"
       >
-        <Background color="rgba(255, 255, 255, 0.1)" gap={20} size={1} />
-        <Controls 
-          className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg"
-        />
+        <Background color="rgba(139,92,246,0.06)" gap={24} size={1} />
+        <Controls />
       </ReactFlow>
-      
+
       {/* Legend */}
-      <div className="absolute bottom-4 left-4 glass-card p-3 text-sm">
-        <h4 className="font-semibold mb-2">How to use:</h4>
-        <ul className="space-y-1 text-xs text-white/80">
+      <div className="card-sm" style={{ position: 'absolute', bottom: 16, left: 16, padding: '12px 16px', zIndex: 5 }}>
+        <p style={{ fontSize: '0.72rem', fontWeight: 700, color: '#7c3aed', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          How to use
+        </p>
+        <ul style={{ fontSize: '0.75rem', color: '#5b21b6', fontWeight: 500, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <li>• Click any step to edit it</li>
-          <li>• Edit & save to create a new branch</li>
-          <li>• Compare branches to see differences</li>
-          <li>• Pan and zoom to explore the tree</li>
+          <li>• Save edit to create a branch</li>
+          <li>• Pan & zoom to explore</li>
         </ul>
       </div>
     </div>

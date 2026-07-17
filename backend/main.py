@@ -54,6 +54,8 @@ async def generate_reasoning_endpoint(request: PromptRequest):
             "rawResponse": raw_response
         }
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -127,3 +129,16 @@ async def compare_branches_endpoint(request: CompareRequest):
 async def health_check():
     """Health check endpoint."""
     return {"status": "healthy"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+    from dotenv import load_dotenv
+    # Load .env from root directory if running from backend folder
+    load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
+    # Default to 8000 since frontend defaults to 8000
+    port = int(os.getenv("PORT", 8000))
+    print(f"Starting server on port {port}...")
+    uvicorn.run("main:app", host="127.0.0.1", port=port, reload=True)
+

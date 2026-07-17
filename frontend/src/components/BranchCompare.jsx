@@ -18,107 +18,121 @@ function BranchCompare({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="glass-panel max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex items-start justify-between mb-6">
-            <h3 className="text-2xl font-bold">🔍 Compare Branches</h3>
-            <button
-              onClick={onClose}
-              className="text-white/70 hover:text-white transition-colors text-2xl"
-            >
-              ×
-            </button>
-          </div>
+    <div className="modal-backdrop">
+      <div className="card" style={{ maxWidth: '800px', width: '100%', maxHeight: '85vh', overflowY: 'auto', border: '1px solid #C4B5FD', padding: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+          <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#1E1B2E' }}>
+            ⚖️ Compare Branches
+          </h3>
+          <button
+            onClick={onClose}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.8rem', color: '#6B7280', lineHeight: 1, opacity: 0.8, padding: '4px' }}
+          >
+            ×
+          </button>
+        </div>
 
-          {/* Branch Selection */}
-          <div className="mb-6">
-            <h4 className="font-semibold mb-3">Select two branches to compare:</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {branches.map((branch, index) => (
+        {/* Branch Selection */}
+        <div style={{ marginBottom: '24px' }}>
+          <p className="section-title">Select two branches to compare:</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            {branches.map((branch, index) => {
+              const isSelected = selectedBranches.includes(branch.id);
+              return (
                 <button
                   key={branch.id}
                   onClick={() => handleBranchToggle(branch.id)}
-                  className={`p-4 rounded-lg border transition-all text-left ${
-                    selectedBranches.includes(branch.id)
-                      ? 'bg-white/30 border-white/40'
-                      : 'bg-white/10 border-white/20 hover:bg-white/20'
-                  }`}
-                  disabled={
-                    !selectedBranches.includes(branch.id) && 
-                    selectedBranches.length >= 2
-                  }
+                  style={{
+                    padding: '16px',
+                    borderRadius: '12px',
+                    border: isSelected ? '2px solid #8b5cf6' : '1px solid #E9E5FF',
+                    backgroundColor: isSelected ? '#F5F3FF' : '#ffffff',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    boxShadow: isSelected ? '0 4px 12px rgba(139, 92, 246, 0.08)' : 'none',
+                  }}
+                  disabled={!isSelected && selectedBranches.length >= 2}
                 >
-                  <div className="flex items-center gap-2">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                     <div 
-                      className="w-4 h-4 rounded-full" 
-                      style={{ backgroundColor: branch.color }}
+                      style={{ 
+                        width: '12px', 
+                        height: '12px', 
+                        borderRadius: '50%', 
+                        backgroundColor: branch.color,
+                        border: '1px solid #ffffff',
+                        boxShadow: `0 0 6px ${branch.color}`
+                      }}
                     />
-                    <span className="font-medium">
+                    <span style={{ fontWeight: 700, color: '#1E1B2E', fontSize: '0.9rem' }}>
                       {index === 0 ? 'Original' : `Branch ${index}`}
                     </span>
                   </div>
-                  <p className="text-xs text-white/60 mt-2 line-clamp-2">
+                  <p style={{ fontSize: '0.78rem', color: '#6B7280', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', lineHeight: 1.4 }}>
                     {branch.prompt}
                   </p>
                 </button>
-              ))}
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Compare Button */}
+        {selectedBranches.length === 2 && !comparison && (
+          <button
+            onClick={onCompare}
+            disabled={loading}
+            className="btn-primary"
+            style={{ width: '100%', marginBottom: '24px' }}
+          >
+            {loading ? 'Comparing...' : '🔄 Compare Selected Branches'}
+          </button>
+        )}
+
+        {/* Comparison Results */}
+        {comparison && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
+            <div style={{ backgroundColor: '#F5F3FF', border: '1px solid #C4B5FD', borderRadius: '12px', padding: '20px' }}>
+              <h4 style={{ fontWeight: 800, color: '#1E1B2E', fontSize: '0.95rem', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>✨</span> Comparison Analysis
+              </h4>
+              <div style={{ fontSize: '0.88rem', color: '#1E1B2E', whiteSpace: 'pre-wrap', lineHeight: 1.6, fontWeight: 500 }}>
+                {comparison}
+              </div>
+            </div>
+
+            {/* Side-by-side conclusions */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              {selectedBranches.map(branchId => {
+                const branch = branches.find(b => b.id === branchId);
+                const index = branches.findIndex(b => b.id === branchId);
+                return (
+                  <div key={branchId} style={{ backgroundColor: '#ffffff', border: '1px solid #E9E5FF', borderRadius: '12px', padding: '16px' }}>
+                    <h5 style={{ fontWeight: 700, color: '#1E1B2E', fontSize: '0.88rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div 
+                        style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: branch.color }} 
+                      />
+                      {index === 0 ? 'Original' : `Branch ${index}`}
+                    </h5>
+                    <p style={{ fontSize: '0.82rem', color: '#6B7280', margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+                      {branch.conclusion}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
+        )}
 
-          {/* Compare Button */}
-          {selectedBranches.length === 2 && !comparison && (
-            <button
-              onClick={onCompare}
-              disabled={loading}
-              className="glass-button w-full py-3 mb-6 disabled:opacity-50"
-            >
-              {loading ? 'Comparing...' : '🔄 Compare Selected Branches'}
-            </button>
-          )}
-
-          {/* Comparison Results */}
-          {comparison && (
-            <div className="space-y-6">
-              <div className="bg-green-500/20 border border-green-400/30 rounded-lg p-4">
-                <h4 className="font-semibold mb-2">✅ Comparison Complete</h4>
-                <div className="text-sm text-white/80 whitespace-pre-wrap">
-                  {comparison}
-                </div>
-              </div>
-
-              {/* Side-by-side conclusions */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {selectedBranches.map(branchId => {
-                  const branch = branches.find(b => b.id === branchId);
-                  const index = branches.findIndex(b => b.id === branchId);
-                  return (
-                    <div key={branchId} className="glass-card p-4">
-                      <h5 className="font-semibold mb-2 flex items-center gap-2">
-                        <div 
-                          className="w-3 h-3 rounded-full" 
-                          style={{ backgroundColor: branch.color }}
-                        />
-                        {index === 0 ? 'Original' : `Branch ${index}`}
-                      </h5>
-                      <p className="text-sm text-white/80">
-                        {branch.conclusion}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="glass-button w-full mt-6 py-3"
-          >
-            Close
-          </button>
-        </div>
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="btn-secondary"
+          style={{ width: '100%', padding: '14px' }}
+        >
+          Close
+        </button>
       </div>
     </div>
   );
