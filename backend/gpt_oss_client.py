@@ -39,7 +39,7 @@ Be explicit about assumptions and trade-offs."""
     
     try:
         response = client.chat.completions.create(
-            model="llama-3.1-70b-versatile",  # Using available model on Groq
+            model="llama-3.3-70b-versatile",  # Using available model on Groq
             messages=messages,
             temperature=0.7,
             max_tokens=2000
@@ -68,7 +68,7 @@ Explain the key differences in assumptions and how they led to different conclus
 
     try:
         response = client.chat.completions.create(
-            model="llama-3.1-70b-versatile",
+            model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.5,
             max_tokens=1000
