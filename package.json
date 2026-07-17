@@ -1,0 +1,22 @@
+{
+  "name": "whatifgpt",
+  "version": "1.0.0",
+  "description": "Interactive reasoning explorer with glassmorphism UI",
+  "private": true,
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && python main.py",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "install:all": "npm install && cd frontend && npm install"
+  },
+  "keywords": [
+    "ai",
+    "reasoning",
+    "gpt",
+    "groq",
+    "glassmorphism"
+  ],
+  "author": "",
+  "license": "MIT"
+}
