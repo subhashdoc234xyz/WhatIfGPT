@@ -8,7 +8,11 @@ An interactive reasoning explorer that turns AI chain-of-thought into an editabl
 
 ✨ **Interactive Reasoning Tree** - Visualize AI reasoning as a navigable graph  
 🔀 **Fork & Edit** - Click any step, change an assumption, create a new branch  
-📊 **Branch Comparison** - Compare different reasoning paths side-by-side  
+⚡ **AI Next-Step Suggestion Forks** - Select AI-suggested steps to fork and automatically create branches  
+⚖️ **Branch Comparison** - Compare different reasoning paths side-by-side  
+📄 **Dedicated Final Output Document View** - Open a distraction-free, full-page digital report view of the final synthesized conclusion  
+✍️ **Premium Markdown Formatting** - Renders beautiful headings, bold text, bullet points, and numbered lists in final reports  
+📋 **Interactive Copy Controls** - Copy the entire synthesized report to the clipboard with one click  
 🎨 **Glassmorphism UI** - Beautiful, modern interface with frosted glass effects and animated backgrounds  
 🌊 **Animated Edges** - Flowing connection lines between reasoning steps  
 💫 **Smooth Transitions** - Hover effects and micro-interactions throughout  
@@ -92,7 +96,11 @@ The app will be available at `http://localhost:5173`
 
 3. **Edit & Fork** - Click any step to edit its assumption. Save to create a new branch with altered reasoning
 
-4. **Compare Branches** - Select two branches to see how different assumptions led to different conclusions
+4. **Add Suggestions as Forks** - Choose an AI-suggested next-step from the panel to automatically fork and continue reasoning in a new branch
+
+5. **Compare Branches** - Select two branches to see how different assumptions led to different conclusions
+
+6. **View Final Output Document** - Once concluded, open the final report page to read, copy, and print your synthesized answer in a beautifully formatted document layout
 
 ## Example Prompts
 
@@ -108,8 +116,10 @@ Try these to see the tool's capabilities:
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/generate` | Generate initial reasoning from a prompt |
-| POST | `/api/fork` | Create a new branch by editing a step |
+| POST | `/api/fork` | Create a new branch by editing/adding a step |
 | POST | `/api/compare` | Compare two reasoning branches |
+| POST | `/api/suggestions` | Generate alternative next reasoning steps |
+| POST | `/api/finish` | Synthesize reasoning steps into a final conclusion |
 | GET | `/api/health` | Health check endpoint |
 
 ## Project Structure
@@ -127,7 +137,8 @@ WhatIfGPT/
 │   │   │   ├── PromptInput.jsx
 │   │   │   ├── ReasoningTree.jsx
 │   │   │   ├── NodeEditor.jsx
-│   │   │   └── BranchCompare.jsx
+│   │   │   ├── BranchCompare.jsx
+│   │   │   └── ConclusionView.jsx
 │   │   ├── App.jsx          # Main application
 │   │   └── index.css        # Glassmorphism styles
 │   ├── index.html
@@ -173,6 +184,7 @@ The application features a stunning **Glassmorphism** design with:
 - 💎 **Frosted glass cards** with backdrop blur
 - ✨ **Glowing hover states** on interactive elements
 - 🌊 **Animated edge connections** in the reasoning tree
+- 📄 **Clean Document Reader Mode** with modern typography and margins
 - 📱 **Responsive design** that works on all screen sizes
 - 🎯 **Custom scrollbars** matching the theme
 - 🔮 **Modal backdrops** with blur effects
