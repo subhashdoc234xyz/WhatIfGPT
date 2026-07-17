@@ -56,33 +56,50 @@ function App() {
     const activeBranch = branches.find(b => b.id === activeBranchId);
     if (!activeBranch) return;
 
-    const currentSteps = activeBranch.steps.filter(s => !s.isConclusion);
-    const lastStep = currentSteps[currentSteps.length - 1];
-    const nextId = lastStep ? lastStep.id + 1 : 1;
+    setLoading(true);
+    setError(null);
+    try {
+      const currentSteps = activeBranch.steps.filter(s => !s.isConclusion);
+      const lastStep = currentSteps[currentSteps.length - 1];
+      const nextId = lastStep ? lastStep.id + 1 : 1;
 
-    const newStep = {
-      id: nextId,
-      stepText: text,
-      dependsOn: lastStep ? lastStep.id : null,
-      isConclusion: false
-    };
+      const newStep = {
+        id: nextId,
+        stepText: text,
+        dependsOn: lastStep ? lastStep.id : null,
+        isConclusion: false
+      };
 
-    const updatedSteps = [...currentSteps, newStep];
+      const response = await fetch(`${API_URL}/api/fork`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: activeBranch.prompt,
+          edited_step: newStep,
+          steps_before_edit: currentSteps,
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to fork reasoning with suggestion');
+      const data = await response.json();
 
-    const updatedBranches = branches.map(b => {
-      if (b.id === activeBranchId) {
-        return {
-          ...b,
-          steps: updatedSteps,
-          conclusion: "" // Clear conclusion since we added a new step
-        };
-      }
-      return b;
-    });
-    setBranches(updatedBranches);
-    setFinalConclusion(null);
+      const newBranch = {
+        id: Date.now(),
+        prompt: activeBranch.prompt,
+        steps: data.steps,
+        conclusion: data.conclusion || "",
+        parentId: activeBranchId,
+        editedStepId: nextId,
+        color: BRANCH_COLORS[(branches.length) % BRANCH_COLORS.length],
+      };
 
-    fetchSuggestions(activeBranch.prompt, updatedSteps);
+      setBranches([...branches, newBranch]);
+      setActiveBranchId(newBranch.id);
+      setSelectedNode(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleFinishReasoning = async () => {
