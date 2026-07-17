@@ -17,6 +17,7 @@ const BRANCH_COLORS = [
 ];
 
 function App() {
+  const [showLanding, setShowLanding] = useState(true);
   const [prompt, setPrompt] = useState('');
   const [branches, setBranches] = useState([]);
   const [activeBranchId, setActiveBranchId] = useState(null);
@@ -269,6 +270,55 @@ function App() {
     { icon: '💼', text: 'Should I accept this job offer?' },
     { icon: '💻', text: "What's the best approach to learn programming?" },
   ];
+
+  if (showLanding) {
+    return (
+      <div className="landing-page-container">
+        {/* Background Aurora Blobs */}
+        <div className="aurora-container">
+          <div className="blob blob-1" />
+          <div className="blob blob-2" />
+          <div className="blob blob-3" />
+        </div>
+
+        <main className="landing-content">
+          <div className="landing-hero">
+            <div className="landing-badge">✨ Interactive AI Reasoning Tree Explorer</div>
+            <h1 className="landing-title">
+              WhatIf<span className="gradient-text">GPT</span>
+            </h1>
+            <p className="landing-subtitle">
+              Don't just read static AI responses. Edit any reasoning step, fork assumptions, and dynamically watch the answers change in real-time.
+            </p>
+            
+            <button className="btn-get-started" onClick={() => setShowLanding(false)}>
+              Explore Reasoning Paths &rarr;
+            </button>
+          </div>
+
+          <div className="landing-grid">
+            <div className="landing-feature-card">
+              <span className="feature-icon">🌿</span>
+              <h3>Interactive Reasoning Tree</h3>
+              <p>Visualize the AI's internal chain-of-thought as a navigable, interactive node graph.</p>
+            </div>
+
+            <div className="landing-feature-card">
+              <span className="feature-icon">🔀</span>
+              <h3>Fork & Edit Steps</h3>
+              <p>Click any node to rewrite assumptions, creating alternative branches instantly.</p>
+            </div>
+
+            <div className="landing-feature-card">
+              <span className="feature-icon">⚖️</span>
+              <h3>Compare Branches</h3>
+              <p>Select multiple reasoning paths and compare variations side-by-side to find the best logic.</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
