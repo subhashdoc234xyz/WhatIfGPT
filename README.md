@@ -9,19 +9,24 @@ An interactive reasoning explorer that turns AI chain-of-thought into an editabl
 ✨ **Interactive Reasoning Tree** - Visualize AI reasoning as a navigable graph  
 🔀 **Fork & Edit** - Click any step, change an assumption, create a new branch  
 📊 **Branch Comparison** - Compare different reasoning paths side-by-side  
-🎨 **Glassmorphism UI** - Beautiful, modern interface with frosted glass effects  
+🎨 **Glassmorphism UI** - Beautiful, modern interface with frosted glass effects and animated backgrounds  
+🌊 **Animated Edges** - Flowing connection lines between reasoning steps  
+💫 **Smooth Transitions** - Hover effects and micro-interactions throughout  
+
+![WhatIfGPT Demo](https://via.placeholder.com/1200x600/1a1a2e/ffffff?text=WhatIfGPT+UI+Preview)
 
 ## Tech Stack
 
 - **Frontend:** React + Vite + Tailwind CSS + React Flow
 - **Backend:** FastAPI (Python)
 - **LLM Inference:** Groq API (gpt-oss compatible models)
+- **Styling:** Custom Glassmorphism CSS with backdrop blur effects
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 16+ 
+- Node.js 16+
 - Python 3.9+
 - A free Groq API key from [console.groq.com](https://console.groq.com)
 
@@ -34,7 +39,20 @@ git clone <your-repo-url>
 cd WhatIfGPT
 ```
 
-#### 2. Set up the backend
+#### 2. Set up environment variables
+
+Copy `.env.example` to `.env` in both backend and frontend directories:
+
+```bash
+# Backend .env
+cp .env.example .env
+# Edit .env and add your GROQ_API_KEY
+
+# Frontend (optional for production)
+echo "VITE_API_URL=https://your-backend-url.com" > frontend/.env
+```
+
+#### 3. Set up the backend
 
 ```bash
 cd backend
@@ -49,7 +67,7 @@ echo "GROQ_API_KEY=your_key_here" > .env
 uvicorn main:app --reload --port 8000
 ```
 
-#### 3. Set up the frontend
+#### 4. Set up the frontend
 
 ```bash
 cd frontend
@@ -80,10 +98,12 @@ Try these to see the tool's capabilities:
 
 ## API Endpoints
 
-- `POST /api/generate` - Generate initial reasoning from a prompt
-- `POST /api/fork` - Create a new branch by editing a step
-- `POST /api/compare` - Compare two reasoning branches
-- `GET /api/health` - Health check endpoint
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/generate` | Generate initial reasoning from a prompt |
+| POST | `/api/fork` | Create a new branch by editing a step |
+| POST | `/api/compare` | Compare two reasoning branches |
+| GET | `/api/health` | Health check endpoint |
 
 ## Project Structure
 
@@ -103,11 +123,26 @@ WhatIfGPT/
 │   │   │   └── BranchCompare.jsx
 │   │   ├── App.jsx          # Main application
 │   │   └── index.css        # Glassmorphism styles
+│   ├── index.html
 │   └── package.json
-├── .env.example
+├── .env.example             # Environment variables template
 ├── README.md
 └── LICENSE
 ```
+
+## Environment Variables
+
+### Backend (.env)
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `GROQ_API_KEY` | Your Groq API key | `gsk_xxxxxxxxxxxxx` |
+
+### Frontend (.env - optional for local dev)
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `VITE_API_URL` | Backend API URL | `https://api.whatifgpt.com` |
 
 ## Deployment
 
@@ -123,13 +158,44 @@ WhatIfGPT/
 2. Deploy the `dist` folder
 3. Set `VITE_API_URL` to your backend URL
 
+## UI Features
+
+The application features a stunning **Glassmorphism** design with:
+
+- 🎨 **Deep gradient backgrounds** with animated pulsing effects
+- 💎 **Frosted glass cards** with backdrop blur
+- ✨ **Glowing hover states** on interactive elements
+- 🌊 **Animated edge connections** in the reasoning tree
+- 📱 **Responsive design** that works on all screen sizes
+- 🎯 **Custom scrollbars** matching the theme
+- 🔮 **Modal backdrops** with blur effects
+
+## Troubleshooting
+
+### "Missing script: dev" error
+
+Make sure you're running `npm run dev` from the `frontend` directory:
+
+```bash
+cd frontend
+npm run dev
+```
+
+### Backend API errors
+
+Ensure you have set your `GROQ_API_KEY` in the backend `.env` file and the server is running on port 8000.
+
+### CORS issues
+
+The backend includes CORS middleware. For production, update the allowed origins in `backend/main.py`.
+
 ## License
 
 MIT License - feel free to use this for your hackathon or personal projects!
 
 ## Hackathon Submission
 
-This project was built for the OpenAI Open Model Hackathon in the **Best Overall / Wildcard** category. It showcases gpt-oss's exposed chain-of-thought in a way closed models can't support, reframing "reasoning" as something explorable and editable rather than a static wall of text.
+This project was built for the **OpenAI Open Model Hackathon** in the **Best Overall / Wildcard** category. It showcases gpt-oss's exposed chain-of-thought in a way closed models can't support, reframing "reasoning" as something explorable and editable rather than a static wall of text.
 
 ---
 
