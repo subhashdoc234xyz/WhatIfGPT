@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react';
 import ReactFlow, { Background, Controls, MarkerType } from 'react-flow-renderer';
+import 'react-flow-renderer/dist/style.css';
+import 'react-flow-renderer/dist/theme-default.css';
 
 function ReasoningTree({ branch, selectedNode, onSelectNode }) {
   const { nodes, edges } = useMemo(() => {
