@@ -25,6 +25,125 @@ function App() {
   const [showCompare, setShowCompare] = useState(false);
   const [compareBranches, setCompareBranches] = useState([]);
   const [comparison, setComparison] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [finalConclusion, setFinalConclusion] = useState(null);
+  const [loadingFinal, setLoadingFinal] = useState(false);
+
+  const fetchSuggestions = async (userPrompt, steps) => {
+    setLoadingSuggestions(true);
+    try {
+      const activeSteps = steps.filter(s => !s.isConclusion);
+      const response = await fetch(`${API_URL}/api/suggestions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: userPrompt, steps: activeSteps }),
+      });
+      if (!response.ok) throw new Error('Failed to fetch suggestions');
+      const data = await response.json();
+      setSuggestions(data.suggestions || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+
+  const handleAddSuggestion = async (text) => {
+    if (!activeBranchId) return;
+    const activeBranch = branches.find(b => b.id === activeBranchId);
+    if (!activeBranch) return;
+
+    const currentSteps = activeBranch.steps.filter(s => !s.isConclusion);
+    const lastStep = currentSteps[currentSteps.length - 1];
+    const nextId = lastStep ? lastStep.id + 1 : 1;
+
+    const newStep = {
+      id: nextId,
+      stepText: text,
+      dependsOn: lastStep ? lastStep.id : null,
+      isConclusion: false
+    };
+
+    const updatedSteps = [...currentSteps, newStep];
+
+    const updatedBranches = branches.map(b => {
+      if (b.id === activeBranchId) {
+        return {
+          ...b,
+          steps: updatedSteps,
+          conclusion: "" // Clear conclusion since we added a new step
+        };
+      }
+      return b;
+    });
+    setBranches(updatedBranches);
+    setFinalConclusion(null);
+
+    fetchSuggestions(activeBranch.prompt, updatedSteps);
+  };
+
+  const handleFinishReasoning = async () => {
+    if (!activeBranchId) return;
+    const activeBranch = branches.find(b => b.id === activeBranchId);
+    if (!activeBranch) return;
+
+    setLoadingFinal(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_URL}/api/finish`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: activeBranch.prompt,
+          steps: activeBranch.steps.filter(s => !s.isConclusion),
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to generate final conclusion');
+      const data = await response.json();
+
+      const currentSteps = activeBranch.steps.filter(s => !s.isConclusion);
+      const lastStep = currentSteps[currentSteps.length - 1];
+      const nextId = lastStep ? lastStep.id + 1 : 1;
+
+      const conclusionStep = {
+        id: nextId,
+        stepText: data.conclusion,
+        dependsOn: lastStep ? lastStep.id : null,
+        isConclusion: true
+      };
+
+      const updatedBranches = branches.map(b => {
+        if (b.id === activeBranchId) {
+          return {
+            ...b,
+            steps: [...currentSteps, conclusionStep],
+            conclusion: data.conclusion
+          };
+        }
+        return b;
+      });
+      setBranches(updatedBranches);
+      setFinalConclusion(data.conclusion);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoadingFinal(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (activeBranchId) {
+      const activeBranch = branches.find(b => b.id === activeBranchId);
+      if (activeBranch) {
+        setFinalConclusion(activeBranch.conclusion || null);
+        fetchSuggestions(activeBranch.prompt, activeBranch.steps);
+      }
+    } else {
+      setSuggestions([]);
+      setFinalConclusion(null);
+    }
+  }, [activeBranchId, branches]);
 
   const handleGenerateReasoning = async (userPrompt) => {
     setLoading(true);
@@ -226,29 +345,83 @@ function App() {
               </div>
             </div>
 
-            <div>
-              {loading && (
-                <div className="card" style={{ padding: '40px', textAlign: 'center', marginBottom: '20px' }}>
-                  <div className="spinner" />
-                  <p style={{ marginTop: '20px', color: '#a78bfa', fontWeight: 600 }}>Updating reasoning tree…</p>
-                </div>
-              )}
-              {activeBranch && (
-                <>
-                  <ReasoningTree
-                    branch={activeBranch}
-                    selectedNode={selectedNode}
-                    onSelectNode={setSelectedNode}
-                  />
-                  {selectedNode && (
-                    <NodeEditor
-                      step={selectedNode}
-                      onSave={handleFork}
-                      onClose={() => setSelectedNode(null)}
+            <div className="main-content-layout">
+              <div className="canvas-area">
+                {loading && (
+                  <div className="card" style={{ padding: '40px', textAlign: 'center', marginBottom: '20px' }}>
+                    <div className="spinner" />
+                    <p style={{ marginTop: '20px', color: '#a78bfa', fontWeight: 600 }}>Updating reasoning tree…</p>
+                  </div>
+                )}
+                {activeBranch && (
+                  <>
+                    <ReasoningTree
+                      branch={activeBranch}
+                      selectedNode={selectedNode}
+                      onSelectNode={setSelectedNode}
                     />
-                  )}
-                </>
-              )}
+                    {selectedNode && (
+                      <NodeEditor
+                        step={selectedNode}
+                        onSave={handleFork}
+                        onClose={() => setSelectedNode(null)}
+                      />
+                    )}
+                  </>
+                )}
+              </div>
+
+              <div className="suggestions-panel">
+                <div className="suggestions-header">
+                  <h3 className="suggestions-title">✨ AI Next-Step Suggestions</h3>
+                  <p className="suggestions-subtitle">Select an option to automatically add it to the reasoning path.</p>
+                </div>
+
+                {loadingSuggestions ? (
+                  <div className="suggestions-loading">
+                    <div className="spinner-sm" />
+                    <span>Analyzing path and preparing next steps...</span>
+                  </div>
+                ) : (
+                  <div className="suggestions-list">
+                    {suggestions.map((sug, i) => (
+                      <div key={i} className="suggestion-card" onClick={() => handleAddSuggestion(sug)}>
+                        <p className="suggestion-text">{sug}</p>
+                        <span className="add-badge">+ Add Step</span>
+                      </div>
+                    ))}
+                    {suggestions.length === 0 && (
+                      <p className="no-suggestions">No suggestions available. The path may already be concluded.</p>
+                    )}
+                  </div>
+                )}
+
+                <div className="finish-action-area">
+                  <button
+                    className="btn-finish"
+                    onClick={handleFinishReasoning}
+                    disabled={loadingFinal || (activeBranch && activeBranch.steps.some(s => s.isConclusion))}
+                  >
+                    {loadingFinal ? (
+                      <>
+                        <div className="spinner-sm" style={{ marginRight: '8px', borderLeftColor: '#fff' }} />
+                        Synthesizing...
+                      </>
+                    ) : (activeBranch && activeBranch.steps.some(s => s.isConclusion)) ? (
+                      '🎯 Path Concluded'
+                    ) : (
+                      '🎯 Finish & Generate Output'
+                    )}
+                  </button>
+                </div>
+
+                {finalConclusion && (
+                  <div className="final-conclusion-card">
+                    <h4 className="final-title">🎯 Final Synthesized Output</h4>
+                    <p className="final-text">{finalConclusion}</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

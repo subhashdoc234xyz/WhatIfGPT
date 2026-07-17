@@ -4,8 +4,21 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import uuid
 
-from gpt_oss_client import generate_reasoning, compare_branches
+from gpt_oss_client import (
+    generate_reasoning,
+    compare_branches,
+    generate_next_suggestions,
+    generate_final_conclusion
+)
 from reasoning_parser import parse_reasoning_steps, extract_conclusion
+
+class SuggestionsRequest(BaseModel):
+    prompt: str
+    steps: List[Dict[str, Any]]
+
+class FinishRequest(BaseModel):
+    prompt: str
+    steps: List[Dict[str, Any]]
 
 app = FastAPI(title="WhatIfGPT API")
 
@@ -122,7 +135,37 @@ async def compare_branches_endpoint(request: CompareRequest):
         )
         return {"comparison": comparison}
     except Exception as e:
+
+@app.post("/api/suggestions")
+async def suggestions_endpoint(request: SuggestionsRequest):
+    """Generate 3 alternative next reasoning steps."""
+    try:
+        options = generate_next_suggestions(
+            prompt=request.prompt,
+            steps=request.steps
+        )
+        return {"suggestions": options}
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/finish")
+async def finish_endpoint(request: FinishRequest):
+    """Synthesize all steps into a final conclusion."""
+    try:
+        conclusion = generate_final_conclusion(
+            prompt=request.prompt,
+            steps=request.steps
+        )
+        return {"conclusion": conclusion}
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 
 
 @app.get("/api/health")

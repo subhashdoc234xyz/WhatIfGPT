@@ -76,3 +76,67 @@ Explain the key differences in assumptions and how they led to different conclus
         return response.choices[0].message.content
     except Exception as e:
         raise Exception(f"API Error: {str(e)}")
+
+
+import re
+
+def generate_next_suggestions(prompt: str, steps: list) -> list:
+    """
+    Generate 3 alternative next steps based on the current reasoning path.
+    """
+    context = "We are building a step-by-step reasoning tree. Here is the progress so far:\n"
+    context += f"Original Question: {prompt}\n\n"
+    context += "Current Steps:\n"
+    for step in steps:
+        context += f"- Step {step['id']}: {step['stepText']}\n"
+    
+    context += "\nGenerate exactly 3 alternative/next steps that could follow this reasoning. Keep each option concise (1-2 sentences). Format your response EXACTLY as:\n"
+    context += "Option 1: [content]\n"
+    context += "Option 2: [content]\n"
+    context += "Option 3: [content]"
+
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": context}],
+            temperature=0.7,
+            max_tokens=500
+        )
+        content = response.choices[0].message.content
+        options = []
+        # Parse out Option 1, Option 2, Option 3
+        matches = re.findall(r'Option\s*\d+:\s*(.+?)(?=(?:Option\s*\d+:|$))', content, re.DOTALL)
+        for match in matches:
+            if match.strip():
+                options.append(match.strip())
+        
+        # Fallback if parsing fails
+        if len(options) < 3:
+            lines = [line.replace("Option 1:", "").replace("Option 2:", "").replace("Option 3:", "").strip() for line in content.split("\n") if line.strip()]
+            options = [line for line in lines if line][:3]
+            
+        return options[:3]
+    except Exception as e:
+        raise Exception(f"API Error: {str(e)}")
+
+
+def generate_final_conclusion(prompt: str, steps: list) -> str:
+    """
+    Synthesize all steps into a final conclusion.
+    """
+    context = f"Original Question: {prompt}\n\n"
+    context += "Reasoning Steps taken:\n"
+    for step in steps:
+        context += f"Step {step['id']}: {step['stepText']}\n"
+    context += "\nBased on the reasoning above, write a comprehensive final output/conclusion that directly answers the original question."
+
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": context}],
+            temperature=0.5,
+            max_tokens=1000
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        raise Exception(f"API Error: {str(e)}")
