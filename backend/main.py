@@ -59,11 +59,12 @@ async def generate_reasoning_endpoint(request: PromptRequest):
             previous_steps=request.previous_steps
         )
         steps = parse_reasoning_steps(raw_response)
-        conclusion = extract_conclusion(steps)
+        # Strip the conclusion step so the user can build on it and click 'Finish' manually
+        steps = [s for s in steps if not s.get("isConclusion")]
         
         return {
             "steps": steps,
-            "conclusion": conclusion,
+            "conclusion": "",
             "rawResponse": raw_response
         }
     except Exception as e:
@@ -101,6 +102,8 @@ async def fork_reasoning_endpoint(request: ForkRequest):
         
         # Parse new steps (these will be the continuation)
         new_steps = parse_reasoning_steps(raw_response)
+        # Strip conclusion steps to keep the path open for suggestions
+        new_steps = [s for s in new_steps if not s.get("isConclusion")]
         
         # Adjust IDs to avoid conflicts
         max_existing_id = max([s["id"] for s in context_steps], default=0)
@@ -111,11 +114,10 @@ async def fork_reasoning_endpoint(request: ForkRequest):
         
         # Combine context steps with new steps
         all_steps = context_steps + new_steps
-        conclusion = extract_conclusion(all_steps)
         
         return {
             "steps": all_steps,
-            "conclusion": conclusion,
+            "conclusion": "",
             "newSteps": new_steps,
             "rawResponse": raw_response
         }
