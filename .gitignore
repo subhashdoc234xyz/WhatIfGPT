@@ -1,11 +1,4 @@
 ```
-# Dependencies
-node_modules/
-frontend/node_modules/
-
 # Build artifacts
-frontend/node_modules/.vite/
-
-# Package lock files
-package-lock.json
+frontend/dist/
 ```
