@@ -3,7 +3,7 @@ import ReactFlow, { Background, Controls, MarkerType } from 'react-flow-renderer
 import 'react-flow-renderer/dist/style.css';
 import 'react-flow-renderer/dist/theme-default.css';
 
-function ReasoningTree({ branch, selectedNode, onSelectNode }) {
+function ReasoningTree({ branch, selectedNode, onSelectNode, onViewConclusion }) {
   const { nodes, edges } = useMemo(() => {
     if (!branch || !branch.steps) return { nodes: [], edges: [] };
 
@@ -71,15 +71,50 @@ function ReasoningTree({ branch, selectedNode, onSelectNode }) {
                   </span>
                 )}
               </div>
-              <p style={{
-                fontSize: '0.82rem',
-                color: '#1E1B2E',
-                lineHeight: 1.55,
-                fontWeight: 500,
-                whiteSpace: 'pre-wrap',
-              }}>
-                {step.stepText}
-              </p>
+              {isConclusion ? (
+                <div style={{ marginTop: '10px', textAlign: 'left' }}>
+                  <p style={{
+                    fontSize: '0.78rem',
+                    color: '#6B7280',
+                    lineHeight: 1.4,
+                    marginBottom: '10px',
+                    fontStyle: 'italic'
+                  }}>
+                    Synthesized output generated successfully.
+                  </p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onViewConclusion(step.stepText);
+                    }}
+                    style={{
+                      background: branch.color,
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '8px 12px',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      width: '100%',
+                      textAlign: 'center',
+                      boxShadow: '0 2px 8px rgba(124, 58, 237, 0.15)',
+                    }}
+                  >
+                    📄 Open Final Output
+                  </button>
+                </div>
+              ) : (
+                <p style={{
+                  fontSize: '0.82rem',
+                  color: '#1E1B2E',
+                  lineHeight: 1.55,
+                  fontWeight: 500,
+                  whiteSpace: 'pre-wrap',
+                }}>
+                  {step.stepText}
+                </p>
+              )}
             </div>
           ),
         },

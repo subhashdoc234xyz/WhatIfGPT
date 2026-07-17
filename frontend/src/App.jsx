@@ -3,6 +3,7 @@ import PromptInput from './components/PromptInput';
 import ReasoningTree from './components/ReasoningTree';
 import NodeEditor from './components/NodeEditor';
 import BranchCompare from './components/BranchCompare';
+import ConclusionView from './components/ConclusionView';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -29,6 +30,7 @@ function App() {
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [finalConclusion, setFinalConclusion] = useState(null);
   const [loadingFinal, setLoadingFinal] = useState(false);
+  const [conclusionTextToView, setConclusionTextToView] = useState(null);
 
   const fetchSuggestions = async (userPrompt, steps) => {
     setLoadingSuggestions(true);
@@ -125,6 +127,7 @@ function App() {
       });
       setBranches(updatedBranches);
       setFinalConclusion(data.conclusion);
+      setConclusionTextToView(data.conclusion);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -142,6 +145,7 @@ function App() {
     } else {
       setSuggestions([]);
       setFinalConclusion(null);
+      setConclusionTextToView(null);
     }
   }, [activeBranchId, branches]);
 
@@ -359,6 +363,7 @@ function App() {
                       branch={activeBranch}
                       selectedNode={selectedNode}
                       onSelectNode={setSelectedNode}
+                      onViewConclusion={setConclusionTextToView}
                     />
                     {selectedNode && (
                       <NodeEditor
@@ -396,7 +401,7 @@ function App() {
                   </div>
                 )}
 
-                <div className="finish-action-area">
+                <div className="finish-action-area" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <button
                     className="btn-finish"
                     onClick={handleFinishReasoning}
@@ -413,12 +418,27 @@ function App() {
                       '🎯 Finish & Generate Output'
                     )}
                   </button>
+
+                  {(activeBranch && activeBranch.steps.some(s => s.isConclusion)) && (
+                    <button
+                      className="btn-secondary"
+                      style={{ width: '100%' }}
+                      onClick={() => setConclusionTextToView(activeBranch.conclusion || finalConclusion)}
+                    >
+                      📄 View Final Document
+                    </button>
+                  )}
                 </div>
 
                 {finalConclusion && (
-                  <div className="final-conclusion-card">
+                  <div 
+                    className="final-conclusion-card clickable-card"
+                    onClick={() => setConclusionTextToView(finalConclusion)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <h4 className="final-title">🎯 Final Synthesized Output</h4>
-                    <p className="final-text">{finalConclusion}</p>
+                    <p className="final-text truncated-text">{finalConclusion}</p>
+                    <span className="view-more-hint">Click to open full document view →</span>
                   </div>
                 )}
               </div>
@@ -436,6 +456,14 @@ function App() {
           comparison={comparison}
           onClose={() => { setShowCompare(false); setComparison(null); }}
           loading={loading}
+        />
+      )}
+
+      {conclusionTextToView && (
+        <ConclusionView
+          text={conclusionTextToView}
+          prompt={activeBranch?.prompt || ""}
+          onClose={() => setConclusionTextToView(null)}
         />
       )}
     </div>

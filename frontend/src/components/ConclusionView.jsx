@@ -1,0 +1,171 @@
+import React, { useState } from 'react';
+
+// Custom inline parser for bold markdown text
+function parseInlineStyles(text) {
+  if (!text) return '';
+  const parts = [];
+  let remaining = text;
+  
+  // Match bold **text**
+  const boldRegex = /\*\*([^*]+)\*\*/g;
+  let match;
+  let lastIndex = 0;
+  
+  while ((match = boldRegex.exec(remaining)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(remaining.substring(lastIndex, match.index));
+    }
+    parts.push(<strong key={match.index} className="conclusion-bold">{match[1]}</strong>);
+    lastIndex = boldRegex.lastIndex;
+  }
+  
+  if (lastIndex < remaining.length) {
+    parts.push(remaining.substring(lastIndex));
+  }
+  
+  return parts.length > 0 ? parts : text;
+}
+
+// Custom Markdown block parser
+function renderFormattedMarkdown(text) {
+  if (!text) return null;
+
+  // Standardize line endings and split by double newlines to isolate block-level structures
+  const blocks = text.split(/\n\n+/);
+
+  return blocks.map((block, index) => {
+    const trimmed = block.trim();
+    if (!trimmed) return null;
+
+    // Handle Headings (e.g. ### Subheading, ## Heading)
+    if (trimmed.startsWith('###')) {
+      return (
+        <h3 key={index} className="conclusion-h3">
+          {parseInlineStyles(trimmed.replace(/^###\s*/, ''))}
+        </h3>
+      );
+    }
+    if (trimmed.startsWith('##')) {
+      return (
+        <h2 key={index} className="conclusion-h2">
+          {parseInlineStyles(trimmed.replace(/^##\s*/, ''))}
+        </h2>
+      );
+    }
+    if (trimmed.startsWith('#')) {
+      return (
+        <h1 key={index} className="conclusion-h1">
+          {parseInlineStyles(trimmed.replace(/^#\s*/, ''))}
+        </h1>
+      );
+    }
+
+    // Handle Bullet/Numbered Lists
+    const lines = trimmed.split('\n');
+    const isBulletList = lines.every(line => line.trim().startsWith('-') || line.trim().startsWith('*'));
+    const isNumberedList = lines.every(line => /^\d+\.\s+/.test(line.trim()));
+
+    if (isBulletList) {
+      return (
+        <ul key={index} className="conclusion-bullet-list">
+          {lines.map((line, lineIndex) => {
+            const cleanLine = line.trim().replace(/^[-*]\s*/, '');
+            return (
+              <li key={lineIndex} className="conclusion-list-item">
+                {parseInlineStyles(cleanLine)}
+              </li>
+            );
+          })}
+        </ul>
+      );
+    }
+
+    if (isNumberedList) {
+      return (
+        <ol key={index} className="conclusion-ordered-list">
+          {lines.map((line, lineIndex) => {
+            const cleanLine = line.trim().replace(/^\d+\.\s*/, '');
+            return (
+              <li key={lineIndex} className="conclusion-list-item">
+                {parseInlineStyles(cleanLine)}
+              </li>
+            );
+          })}
+        </ol>
+      );
+    }
+
+    // Default Paragraph rendering
+    // If paragraph contains internal single newlines, we preserve them
+    const paragraphLines = trimmed.split('\n');
+    return (
+      <p key={index} className="conclusion-paragraph">
+        {paragraphLines.map((line, lineIdx) => (
+          <React.Fragment key={lineIdx}>
+            {parseInlineStyles(line)}
+            {lineIdx < paragraphLines.length - 1 && <br />}
+          </React.Fragment>
+        ))}
+      </p>
+    );
+  });
+}
+
+function ConclusionView({ text, prompt, onClose }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
+  return (
+    <div className="conclusion-overlay-page">
+      <div className="conclusion-container">
+        
+        {/* Navigation / Header bar */}
+        <header className="conclusion-header">
+          <button className="btn-back-editor" onClick={onClose}>
+            ← Go Back to Canvas
+          </button>
+          
+          <div className="conclusion-actions">
+            <button className={`btn-action-copy ${copied ? 'copied' : ''}`} onClick={handleCopy}>
+              {copied ? '✓ Copied!' : '📋 Copy Report'}
+            </button>
+          </div>
+        </header>
+
+        {/* Document content */}
+        <div className="conclusion-paper-wrapper">
+          <article className="conclusion-paper">
+            
+            {/* Top Prompt / Metadata box */}
+            <div className="conclusion-meta-box">
+              <span className="meta-tag">Query Prompt</span>
+              <h2 className="meta-prompt">"{prompt}"</h2>
+            </div>
+
+            {/* Main formatted body */}
+            <div className="conclusion-body">
+              {renderFormattedMarkdown(text)}
+            </div>
+
+            {/* Footer */}
+            <footer className="conclusion-paper-footer">
+              <p>Generated by WhatIfGPT • Dynamic Reasoning Engine</p>
+            </footer>
+          </article>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+export default ConclusionView;
