@@ -41,38 +41,45 @@ cd WhatIfGPT
 
 #### 2. Set up environment variables
 
-Copy `.env.example` to `.env` in both backend and frontend directories:
+Copy `.env.example` to `.env` in the root directory:
 
 ```bash
-# Backend .env
 cp .env.example .env
 # Edit .env and add your GROQ_API_KEY
-
-# Frontend (optional for production)
-echo "VITE_API_URL=https://your-backend-url.com" > frontend/.env
 ```
 
-#### 3. Set up the backend
+#### 3. Install all dependencies
 
 ```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-
-# Create .env file with your API key
-echo "GROQ_API_KEY=your_key_here" > .env
-
-# Start the backend server
-uvicorn main:app --reload --port 8000
-```
-
-#### 4. Set up the frontend
-
-```bash
-cd frontend
+# From the root directory
 npm install
+cd frontend && npm install
+cd ../backend
+pip install -r requirements.txt
+```
+
+#### 4. Start the application
+
+**Option A: Run both frontend and backend separately (Recommended)**
+
+```bash
+# Terminal 1 - Start Backend
+cd backend
+python main.py
+
+# Terminal 2 - Start Frontend
+cd frontend
 npm run dev
+```
+
+**Option B: Use root package.json scripts**
+
+```bash
+# From root directory
+npm run dev:frontend  # Starts frontend on http://localhost:5173
+
+# In another terminal
+npm run dev:backend   # Starts backend on http://localhost:5000
 ```
 
 The app will be available at `http://localhost:5173`
