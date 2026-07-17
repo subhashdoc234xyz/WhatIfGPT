@@ -62,14 +62,17 @@ function renderFormattedMarkdown(text) {
 
     // Handle Bullet/Numbered Lists
     const lines = trimmed.split('\n');
-    const isBulletList = lines.every(line => line.trim().startsWith('-') || line.trim().startsWith('*'));
+    const isBulletList = lines.every(line => {
+      const t = line.trim();
+      return t.startsWith('- ') || t.startsWith('* ') || t === '-' || t === '*';
+    });
     const isNumberedList = lines.every(line => /^\d+\.\s+/.test(line.trim()));
 
     if (isBulletList) {
       return (
         <ul key={index} className="conclusion-bullet-list">
           {lines.map((line, lineIndex) => {
-            const cleanLine = line.trim().replace(/^[-*]\s*/, '');
+            const cleanLine = line.trim().replace(/^[-*]\s+/, '');
             return (
               <li key={lineIndex} className="conclusion-list-item">
                 {parseInlineStyles(cleanLine)}
