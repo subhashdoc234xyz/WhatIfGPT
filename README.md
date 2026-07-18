@@ -1,61 +1,51 @@
+<h1 align="center">WhatIfGPT</h1>
+
 <p align="center">
-  <h1 align="center">WhatIfGPT</h1>
-  <p align="center"><strong>Don't just read reasoning — fork it, edit it, and watch the answer change.</strong></p>
+  <strong>Don't just read reasoning — fork it, edit it, and watch the answer change.</strong>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
-  <img src="https://img.shields.io/badge/React-18-61DAFB?logo=react" alt="React">
-  <img src="https://img.shields.io/badge/FastAPI-Python-009688?logo=fastapi" alt="FastAPI">
-  <img src="https://img.shields.io/badge/Tailwind-CSS-38B2AC?logo=tailwind-css" alt="Tailwind CSS">
-  <img src="https://img.shields.io/badge/Python-3.9+-3776AB?logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/React-18-61DAFB?logo=react" alt="React" />
+  <img src="https://img.shields.io/badge/FastAPI-Python-009688?logo=fastapi" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/TailwindCSS-3-38BDF8?logo=tailwindcss" alt="TailwindCSS" />
+  <img src="https://img.shields.io/badge/License-MIT-purple" alt="License" />
 </p>
-
-<br/>
 
 <p align="center">
-  <img src="./docs/thumbnail.png" alt="WhatIfGPT banner">
+  <img src="./docs/thumbnail.png" alt="WhatIfGPT banner" width="100%" />
 </p>
 
-<!-- 
-  📷 IMAGE PLACEHOLDER: Please add a banner image named 'thumbnail.png' to the /docs folder.
-  This should be a sky-blue decision tree or similar visual that represents the project.
--->
+---
 
-WhatIfGPT is an interactive AI reasoning explorer that transforms LLM chain-of-thought into an editable, forkable tree. Unlike traditional chatbots that present reasoning as a static wall of text, WhatIfGPT lets you click into any step of the AI's reasoning, edit its assumptions, and instantly see how those changes ripple through to alter the final conclusion. It's built for deep exploration of complex decisions and was originally created for the OpenAI Open Model Hackathon (gpt-oss) and later extended for OpenAI Build Week (Codex + GPT-5.6).
+WhatIfGPT is an interactive AI reasoning explorer that turns raw `gpt-oss`/LLM chain-of-thought outputs into an editable, forkable tree structure. Unlike traditional chatbots that present reasoning as a static, read-only wall of text, WhatIfGPT allows you to visually inspect the AI's step-by-step logic, click on any intermediate step to edit or rephrase assumptions, and instantly fork the path to explore how different hypotheses or tweaks change the final synthesized conclusion.
 
 ## Features
 
-- ✨ **Interactive Reasoning Tree** – Visualize AI reasoning as a navigable, interactive graph
-- 🔀 **Fork & Edit Any Step** – Click any node, change an assumption, and create a new branch
-- ⚡ **AI Next-Step Suggestions** – Get intelligent suggestions for what to explore next
-- ⚖️ **Branch Comparison** – Compare different reasoning paths side-by-side
-- 📄 **Dedicated Final Report View** – Clean, distraction-free document view of synthesized conclusions
-- ✍️ **Premium Markdown Formatting** – Beautiful headings, bold text, lists in exported reports
-- 📋 **One-Click Copy to Clipboard** – Export the entire report instantly
-- 🎨 **Glassmorphism UI** – Modern frosted-glass interface with animated gradients
+- 🔀 **Interactive Reasoning Tree**: Visualize the AI's step-by-step logic in an interactive, clean nodes-based graph view.
+- ✏️ **Fork & Edit**: Modify any reasoning node's content, fork it, and let the AI compute new paths from that point.
+- 💡 **AI Next-Step Suggestions**: View and select from alternative next steps proposed by the AI to spawn new branches.
+- ⚖️ **Branch Comparison**: Compare different reasoning branches side-by-side to easily spot key differences.
+- 📄 **Dedicated Final Report View**: Review a distraction-free, full-page digital report view of your finalized conclusion.
+- ✍️ **Premium Markdown Formatting**: The final synthesized report is rendered with elegant headers, bold text, lists, and quotes.
+- 📋 **One-Click Copy**: Instantly copy the entire finalized conclusion to your clipboard with clean markdown preservation.
+- 🎨 **Glassmorphism UI**: Beautiful, premium dark-mode interface complete with animated gradient backdrops.
 
 ## Demo
 
-<p align="center">
-  <img src="./docs/screenshot-1.png" alt="App screenshot" width="800">
-  <br/>
-  <em>The WhatIfGPT interface showing a question being asked and the resulting reasoning tree. Click any node to fork and edit its content.</em>
-</p>
+![Home screen](./docs/screenshot-1.png)
+*Home screen showing prompt input to initiate a new reasoning tree.*
 
-<!-- 
-  📷 IMAGE PLACEHOLDER: Please add a screenshot named 'screenshot-1.png' to the /docs folder.
-  Capture the "Ask a Question" home screen or the reasoning tree in action.
--->
+![Reasoning tree in action](./docs/screenshot-2.png)
+*Interactive reasoning tree view where users can click to edit/fork nodes and generate alternative branches.*
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|------------|
-| Frontend | React, Vite, Tailwind CSS, React Flow |
-| Backend | FastAPI (Python) |
-| LLM | gpt-oss via Groq API / GPT-5.6 via Codex |
-| Styling | Custom glassmorphism CSS with backdrop blur |
+| :--- | :--- |
+| **Frontend** | React, Vite, Tailwind CSS, React Flow |
+| **Backend** | FastAPI (Python) |
+| **LLM** | `gpt-oss` via Groq API / GPT-5.6 via Codex |
+| **Styling** | Custom Glassmorphism CSS with backdrop blur effects |
 
 ## Getting Started
 
@@ -63,113 +53,101 @@ WhatIfGPT is an interactive AI reasoning explorer that transforms LLM chain-of-t
 
 - Node.js 16+
 - Python 3.9+
-- A free Groq API key (get one at [console.groq.com](https://console.groq.com))
+- A free Groq API key from [console.groq.com](https://console.groq.com)
 
-### Installation
+### 1. Clone the repository
 
-1. **Clone the repository**
+```bash
+git clone https://github.com/subhashdoc234xyz/WhatIfGPT.git
+cd WhatIfGPT
+```
 
-   ```bash
-   git clone https://github.com/subhashdoc234xyz/WhatIfGPT.git
-   cd WhatIfGPT
-   ```
+### 2. Environment variable setup
 
-2. **Set up environment variables**
+Copy `.env.example` in the root directory to `.env`:
 
-   ```bash
-   cp .env.example .env
-   # Edit .env and add your GROQ_API_KEY
-   ```
+```bash
+cp .env.example .env
+```
 
-3. **Install dependencies**
+Open `.env` and add your Groq API key:
 
-   ```bash
-   # From root directory
-   npm install
+```env
+GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxxxxxx
+```
 
-   # Install frontend dependencies
-   cd frontend && npm install
+### 3. Install dependencies
 
-   # Install backend dependencies
-   cd ../backend
-   pip install -r requirements.txt
-   ```
+```bash
+# Install root package runner dependencies
+npm install
 
-4. **Run the application**
+# Install Frontend dependencies
+cd frontend && npm install
 
-   **Terminal 1 – Backend:**
-   ```bash
-   cd backend
-   uvicorn main:app --reload --port 8000
-   ```
+# Install Backend dependencies
+cd ../backend
+pip install -r requirements.txt
+```
 
-   **Terminal 2 – Frontend:**
-   ```bash
-   cd frontend
-   npm run dev
-   ```
+### 4. Run the application
 
-   The app will be available at **http://localhost:5173**
+To run both services simultaneously from the root directory:
+
+```bash
+# Terminal 1 - Start the FastAPI backend
+cd backend
+python main.py
+
+# Terminal 2 - Start the React frontend
+cd frontend
+npm run dev
+```
+
+The frontend application will be running locally at `http://localhost:5173`.
 
 ## Usage
 
-1. **Enter a Question** – Type a problem or decision you want to explore (e.g., "Should I launch this product in Q1 or Q2?")
-2. **View the Reasoning Tree** – The AI breaks down its reasoning into numbered steps displayed as an interactive tree
-3. **Click a Node to Edit & Fork** – Modify any assumption and save to create a new branch with altered reasoning
-4. **Compare Branches** – Select two branches to see how different assumptions led to different conclusions
-5. **Export the Final Report** – Once concluded, open the final report page to read, copy, and print your synthesized answer
+1. **Enter a Question**: Input a prompt or problem you want to analyze in detail.
+2. **View Reasoning Tree**: Navigate the generated step-by-step reasoning tree.
+3. **Fork & Edit**: Click any node in the tree, edit its text or assumptions, and click "Fork" to spin off a new branch.
+4. **Compare Branches**: Use the branch selection control to view and compare different reasoning paths side-by-side.
+5. **Export Final Report**: Finalize a branch to synthesize it into a clean, copyable markdown report.
 
 ## Project Structure
 
 ```
 WhatIfGPT/
-├── backend/
-│   ├── main.py              # FastAPI application
-│   ├── gpt_oss_client.py    # Groq API wrapper
-│   ├── reasoning_parser.py  # Parse model output into steps
-│   └── requirements.txt     # Python dependencies
-├── frontend/
-│   ├── src/
-│   │   ├── components/      # React components
-│   │   │   ├── PromptInput.jsx
-│   │   │   ├── ReasoningTree.jsx
-│   │   │   ├── NodeEditor.jsx
-│   │   │   ├── BranchCompare.jsx
-│   │   │   └── ConclusionView.jsx
-│   │   ├── App.jsx          # Main application
-│   │   └── index.css        # Glassmorphism styles
-│   ├── index.html
-│   └── package.json
-├── docs/                    # README images (thumbnail.png, screenshot-1.png)
-├── .env.example             # Environment variables template
-├── README.md
-└── LICENSE
+├── backend/            # FastAPI backend server & LLM integration
+├── docs/               # Documentation images
+├── frontend/           # Vite + React frontend dashboard
+├── .env.example        # Environment variable template
+├── README.md           # This file
+└── LICENSE             # License terms
 ```
 
 ## API Endpoints
 
 | Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/generate` | Generate initial reasoning from a prompt |
-| POST | `/api/fork` | Create a new branch by editing/adding a step |
-| POST | `/api/compare` | Compare two reasoning branches |
-| POST | `/api/suggestions` | Generate alternative next reasoning steps |
-| POST | `/api/finish` | Synthesize reasoning steps into a final conclusion |
-| GET | `/api/health` | Health check endpoint |
+| :--- | :--- | :--- |
+| `POST` | `/api/generate` | Generates initial reasoning steps from a user prompt |
+| `POST` | `/api/fork` | Fork a reasoning path from a specific node with modified text |
+| `POST` | `/api/compare` | Compares two reasoning paths/branches side-by-side |
+| `POST` | `/api/suggestions` | Generates alternative step suggestions for a given node |
+| `POST` | `/api/finish` | Synthesizes a path of reasoning steps into a final conclusion document |
+| `GET` | `/api/health` | Backend status check endpoint |
 
 ## Deployment
 
 ### Backend (Render)
-
-1. Deploy the `backend` folder to Render
-2. Set the `GROQ_API_KEY` environment variable in the Render dashboard
-3. Configure CORS for your frontend domain
+1. Set up a Web Service on Render pointing to the `/backend` folder.
+2. Select **Python** as the environment and use `uvicorn main:app --host 0.0.0.0 --port $PORT` as the start command.
+3. Add the `GROQ_API_KEY` to the environment variables section in your Render dashboard.
 
 ### Frontend (Vercel / Render)
-
-1. Build with `npm run build`
-2. Deploy the `dist` folder
-3. Set `VITE_API_URL` to your deployed backend URL
+1. Build the production build using `npm run build` within the frontend directory.
+2. Deploy the resulting `/frontend/dist` directory to Vercel or Render.
+3. Make sure to point `VITE_API_URL` to your live backend endpoint.
 
 ## Team
 
@@ -180,12 +158,14 @@ WhatIfGPT/
 
 ## Hackathon
 
-This project was built for **OpenAI Build Week** (Codex + GPT-5.6), extending an original prototype from the **OpenAI Open Model Hackathon** (gpt-oss). It demonstrates how exposed chain-of-thought can be transformed from a static monologue into an interactive, editable exploration tool—something only possible with open reasoning models.
+This project was built for **OpenAI Build Week (Codex + GPT-5.6)**. It leverages the raw chain-of-thought generation features of open LLMs, rendering reasoning steps as modular interactive blocks that let users override model assumptions at any point.
 
 ## License
 
-MIT License – feel free to use this for your hackathon or personal projects!
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-<p align="center"><em>Made with reasoning, forks, and a lot of coffee.</em></p>
+<p align="center">
+  <em>Made with reasoning, forks, and a lot of coffee.</em>
+</p>
