@@ -5,12 +5,20 @@ from typing import List, Optional, Dict, Any
 import uuid
 
 from gpt_oss_client import (
+    GroqRequestError,
     generate_reasoning,
     compare_branches,
     generate_next_suggestions,
     generate_final_conclusion
 )
 from reasoning_parser import parse_reasoning_steps, extract_conclusion
+
+
+def raise_api_error(error: Exception):
+    """Convert expected Groq failures into safe, structured API responses."""
+    if isinstance(error, GroqRequestError):
+        raise HTTPException(status_code=error.status_code, detail=str(error)) from error
+    raise HTTPException(status_code=500, detail="The server could not complete the request. Please try again.") from error
 
 class SuggestionsRequest(BaseModel):
     prompt: str
@@ -68,9 +76,7 @@ async def generate_reasoning_endpoint(request: PromptRequest):
             "rawResponse": raw_response
         }
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise_api_error(e)
 
 
 @app.post("/api/fork")
@@ -122,7 +128,7 @@ async def fork_reasoning_endpoint(request: ForkRequest):
             "rawResponse": raw_response
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise_api_error(e)
 
 
 @app.post("/api/compare")
@@ -137,7 +143,7 @@ async def compare_branches_endpoint(request: CompareRequest):
         )
         return {"comparison": comparison}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise_api_error(e)
 
 @app.post("/api/suggestions")
 async def suggestions_endpoint(request: SuggestionsRequest):
@@ -149,9 +155,7 @@ async def suggestions_endpoint(request: SuggestionsRequest):
         )
         return {"suggestions": options}
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise_api_error(e)
 
 
 @app.post("/api/finish")
@@ -164,9 +168,7 @@ async def finish_endpoint(request: FinishRequest):
         )
         return {"conclusion": conclusion}
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise_api_error(e)
 
 
 

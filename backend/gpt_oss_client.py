@@ -1,10 +1,64 @@
 import os
+import time
 from groq import Groq
 from dotenv import load_dotenv
 
 load_dotenv()
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+
+class GroqRequestError(Exception):
+    """A safe, user-facing error raised when a Groq request cannot complete."""
+
+    def __init__(self, message: str, status_code: int = 502):
+        super().__init__(message)
+        self.status_code = status_code
+
+
+def _create_completion(**kwargs):
+    """Run a Groq completion with consistent, friendly error handling."""
+    if not os.getenv("GROQ_API_KEY"):
+        raise GroqRequestError(
+            "Groq API key is missing. Add GROQ_API_KEY to the backend environment and restart the server.",
+            status_code=401,
+        )
+
+    max_retries = 3
+    for attempt in range(max_retries + 1):
+        try:
+            return client.chat.completions.create(**kwargs)
+        except Exception as error:
+            status_code = getattr(error, "status_code", None)
+            error_name = type(error).__name__
+
+            if status_code in (401, 403):
+                raise GroqRequestError(
+                    "The Groq API key is invalid or does not have permission to use this model. Check GROQ_API_KEY and try again.",
+                    status_code=401,
+                ) from error
+
+            if error_name == "APITimeoutError" or isinstance(error, TimeoutError):
+                raise GroqRequestError(
+                    "The AI service timed out before it could respond. Please try again.",
+                    status_code=504,
+                ) from error
+
+            if status_code == 429:
+                if attempt == max_retries:
+                    raise GroqRequestError(
+                        "The AI service is busy due to rate limits. Please wait a moment and try again.",
+                        status_code=429,
+                    ) from error
+
+                # Retry rate limits up to three times with 1s, 2s, then 4s exponential backoff.
+                time.sleep(2 ** attempt)
+                continue
+
+            raise GroqRequestError(
+                "The AI service could not complete the request. Please try again shortly.",
+                status_code=502,
+            ) from error
 
 def generate_reasoning(prompt: str, system_prompt: str = None, previous_steps: list = None):
     """
@@ -37,16 +91,13 @@ Be explicit about assumptions and trade-offs."""
     else:
         messages.append({"role": "user", "content": prompt})
     
-    try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",  # Using available model on Groq
-            messages=messages,
-            temperature=0.7,
-            max_tokens=2000
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        raise Exception(f"API Error: {str(e)}")
+    response = _create_completion(
+        model="llama-3.3-70b-versatile",  # Using available model on Groq
+        messages=messages,
+        temperature=0.7,
+        max_tokens=2000,
+    )
+    return response.choices[0].message.content
 
 
 def compare_branches(branch1_steps: list, branch1_conclusion: str, 
@@ -66,16 +117,13 @@ Conclusion: {branch2_conclusion}
 
 Explain the key differences in assumptions and how they led to different conclusions."""
 
-    try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.5,
-            max_tokens=1000
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        raise Exception(f"API Error: {str(e)}")
+    response = _create_completion(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.5,
+        max_tokens=1000,
+    )
+    return response.choices[0].message.content
 
 
 import re
@@ -95,29 +143,26 @@ def generate_next_suggestions(prompt: str, steps: list) -> list:
     context += "Option 2: [content]\n"
     context += "Option 3: [content]"
 
-    try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": context}],
-            temperature=0.7,
-            max_tokens=500
-        )
-        content = response.choices[0].message.content
-        options = []
-        # Parse out Option 1, Option 2, Option 3
-        matches = re.findall(r'Option\s*\d+:\s*(.+?)(?=(?:Option\s*\d+:|$))', content, re.DOTALL)
-        for match in matches:
-            if match.strip():
-                options.append(match.strip())
-        
-        # Fallback if parsing fails
-        if len(options) < 3:
-            lines = [line.replace("Option 1:", "").replace("Option 2:", "").replace("Option 3:", "").strip() for line in content.split("\n") if line.strip()]
-            options = [line for line in lines if line][:3]
-            
-        return options[:3]
-    except Exception as e:
-        raise Exception(f"API Error: {str(e)}")
+    response = _create_completion(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": context}],
+        temperature=0.7,
+        max_tokens=500,
+    )
+    content = response.choices[0].message.content
+    options = []
+    # Parse out Option 1, Option 2, Option 3
+    matches = re.findall(r'Option\s*\d+:\s*(.+?)(?=(?:Option\s*\d+:|$))', content, re.DOTALL)
+    for match in matches:
+        if match.strip():
+            options.append(match.strip())
+
+    # Fallback if parsing fails
+    if len(options) < 3:
+        lines = [line.replace("Option 1:", "").replace("Option 2:", "").replace("Option 3:", "").strip() for line in content.split("\n") if line.strip()]
+        options = [line for line in lines if line][:3]
+
+    return options[:3]
 
 
 def generate_final_conclusion(prompt: str, steps: list) -> str:
@@ -130,13 +175,10 @@ def generate_final_conclusion(prompt: str, steps: list) -> str:
         context += f"Step {step['id']}: {step['stepText']}\n"
     context += "\nBased on the reasoning above, write a comprehensive final output/conclusion that directly answers the original question."
 
-    try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": context}],
-            temperature=0.5,
-            max_tokens=1000
-        )
-        return response.choices[0].message.content.strip()
-    except Exception as e:
-        raise Exception(f"API Error: {str(e)}")
+    response = _create_completion(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": context}],
+        temperature=0.5,
+        max_tokens=1000,
+    )
+    return response.choices[0].message.content.strip()

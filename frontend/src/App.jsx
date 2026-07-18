@@ -16,6 +16,16 @@ const BRANCH_COLORS = [
   '#7C3AED', // Violet-600 (Fork E)
 ];
 
+const getApiError = async (response, fallbackMessage) => {
+  try {
+    const body = await response.json();
+    if (body?.detail) return body.detail;
+  } catch {
+    // Use the fallback when the server did not return a JSON error body.
+  }
+  return fallbackMessage;
+};
+
 function App() {
   const [showLanding, setShowLanding] = useState(true);
   const [prompt, setPrompt] = useState('');
@@ -42,11 +52,11 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: userPrompt, steps: activeSteps }),
       });
-      if (!response.ok) throw new Error('Failed to fetch suggestions');
+      if (!response.ok) throw new Error(await getApiError(response, 'Failed to fetch suggestions.'));
       const data = await response.json();
       setSuggestions(data.suggestions || []);
     } catch (err) {
-      console.error(err);
+      setError(err.message || 'Unable to fetch suggestions. Please try again.');
     } finally {
       setLoadingSuggestions(false);
     }
@@ -80,7 +90,7 @@ function App() {
           steps_before_edit: currentSteps,
         }),
       });
-      if (!response.ok) throw new Error('Failed to fork reasoning with suggestion');
+      if (!response.ok) throw new Error(await getApiError(response, 'Failed to fork reasoning with suggestion.'));
       const data = await response.json();
 
       const newBranch = {
@@ -119,7 +129,7 @@ function App() {
           steps: activeBranch.steps.filter(s => !s.isConclusion),
         }),
       });
-      if (!response.ok) throw new Error('Failed to generate final conclusion');
+      if (!response.ok) throw new Error(await getApiError(response, 'Failed to generate final conclusion.'));
       const data = await response.json();
 
       const currentSteps = activeBranch.steps.filter(s => !s.isConclusion);
@@ -176,7 +186,7 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: userPrompt }),
       });
-      if (!response.ok) throw new Error('Failed to generate reasoning');
+      if (!response.ok) throw new Error(await getApiError(response, 'Failed to generate reasoning.'));
       const data = await response.json();
       const newBranch = {
         id: Date.now(),
@@ -214,7 +224,7 @@ function App() {
           steps_before_edit: stepsBeforeEdit,
         }),
       });
-      if (!response.ok) throw new Error('Failed to fork reasoning');
+      if (!response.ok) throw new Error(await getApiError(response, 'Failed to fork reasoning.'));
       const data = await response.json();
       const newBranch = {
         id: Date.now(),
@@ -251,7 +261,7 @@ function App() {
           branch2_conclusion: branch2.conclusion,
         }),
       });
-      if (!response.ok) throw new Error('Failed to compare branches');
+      if (!response.ok) throw new Error(await getApiError(response, 'Failed to compare branches.'));
       const data = await response.json();
       setComparison(data.comparison);
     } catch (err) {

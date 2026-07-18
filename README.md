@@ -160,6 +160,10 @@ WhatIfGPT/
 
 This project was built for **OpenAI Build Week (Codex + GPT-5.6)**. It leverages the raw chain-of-thought generation features of open LLMs, rendering reasoning steps as modular interactive blocks that let users override model assumptions at any point.
 
+### Codex Contribution
+
+Codex improved the app's Groq API reliability and user-facing error handling. It added exponential-backoff retries for rate-limit responses, clear handling for timeouts and missing or invalid API keys, safe backend error responses, and readable in-app error messages so users can understand and recover from AI-service failures without disrupting the reasoning-tree or fork workflow.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
