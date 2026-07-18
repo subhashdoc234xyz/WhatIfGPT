@@ -1,1 +1,56 @@
-Nothing needs to be added to .gitignore since only a README.md file was modified and no build artifacts, dependencies, or temporary files were included in the changes.
+# Environment Variables
+.env
+.env.local
+.env.*.local
+*.env
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Dependency directories
+node_modules/
+jspm_packages/
+web_modules/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+
+# Python Cache & Virtual Environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+.hypothesis/
+
+# Logs and databases
+*.log
+*.sqlite
+
+# OS Metadata
+.DS_Store
+Thumbs.db
+
+# IDEs and editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
