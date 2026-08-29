@@ -17,6 +17,7 @@ function NodeEditor({ step, onSave, onClose }) {
           </h3>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.8rem', color: '#6B7280', lineHeight: 1, opacity: 0.8, padding: '4px' }}
           >
             ×
