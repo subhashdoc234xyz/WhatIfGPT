@@ -17,7 +17,16 @@ function ReasoningTree({ branch, selectedNode, onSelectNode, onViewConclusion })
         data: {
           label: (
             <div
+              role="button"
+              tabIndex={0}
+              aria-label={isConclusion ? 'View conclusion' : `Edit step ${step.id}`}
               onClick={() => onSelectNode(step)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSelectNode(step);
+                }
+              }}
               style={{
                 background: isSelected ? '#F5F3FF' : '#ffffff',
                 border: isSelected 
